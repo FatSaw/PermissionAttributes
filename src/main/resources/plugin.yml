@@ -1,0 +1,4 @@
+name: PermissionAttributes
+main: me.bomb.permissionattributes.PermissionAttributes
+version: ${revision}
+author: Bomb
