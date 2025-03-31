@@ -65,13 +65,14 @@ public final class AttributeUpdater extends Thread {
 			tosetattr.clear();
 			ArrayList<Player> players = new ArrayList<>(server.getOnlinePlayers());
 			permissionhashes.keySet().retainAll(players);
+			EnumMap<Attribute, Double> defaultattributes = attributes.get(DEFAULT);
 			for(Player player : players) {
 				final Set<PermissionAttachmentInfo> permissions = player.getEffectivePermissions();
-				final int hashcode = permissions.hashCode();
-				final Integer previoushash = permissionhashes.get(player);
-				if(previoushash == null || hashcode != previoushash) {
-					permissionhashes.put(player, hashcode);
-					String apply = DEFAULT;
+				final Integer size = permissions.size(), previoussize = permissionhashes.get(player);
+				if(previoussize == null || Integer.compare(size, previoussize) != 0) {
+					permissionhashes.put(player, size);
+					EnumMap<Attribute, Double> attributemap = new EnumMap<>(Attribute.class);
+					attributemap.putAll(defaultattributes);
 					for(PermissionAttachmentInfo permissionattachmentinfo : permissions) {
 						final String permission;
 						if(!permissionattachmentinfo.getValue() || !(permission = permissionattachmentinfo.getPermission()).startsWith(PERMISSION_PREFIX, 0)) {
@@ -81,14 +82,9 @@ public final class AttributeUpdater extends Thread {
 						while(--i > -1) {
 							String group = ids[i];
 							if(permission.startsWith(group, PERMISSION_PREFIX_SIZE)) {
-								apply = group;
-								break;
+								attributemap.putAll(attributes.get(group));
 							}
 						}
-					}
-					EnumMap<Attribute, Double> attributemap = attributes.get(apply);
-					if(attributemap == null) {
-						continue;
 					}
 					tosetattr.put(player, attributemap);
 				}
