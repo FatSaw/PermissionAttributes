@@ -34,7 +34,7 @@ public final class Configuration {
 	}
 	
 	protected Configuration(Logger logger, Path file) {
-		final HashMap<String, EnumMap<Attribute, Double>> attributes = new HashMap<String, EnumMap<Attribute, Double>>();
+		final HashMap<String, EnumMap<Attribute, Double>> attributes = new HashMap<String, EnumMap<Attribute, Double>>(1);
 		final SimpleConfiguration sc;
 		{
 			byte[] bytes = null;
@@ -95,32 +95,29 @@ public final class Configuration {
 			}
 			sc = new SimpleConfiguration(bytes, StandardCharsets.US_ASCII);
 		}
-		final String attributesidkey = "attributes\0";
-		final String[] keys = sc.getSubKeys(attributesidkey);
-		int i = keys.length;
-		if(i > 255) {
-			i = 255;
-		}
 		StringBuilder sb = new StringBuilder("\nInvalid options:");
+		attributes.put(DEFAULT, readAttributes(sb, sc, "default\0attributes\0"));
+		final String groupskey = "groups\0";
+		final String[] keys = sc.getSubKeys(groupskey);
+		int i = keys.length;
+		if(i > 254) {
+			i = 254;
+		}
 		HashMap<Byte, String> priorities = new HashMap<Byte, String>(i);
 		String[] ids = new String[i];
 		while(--i > -1) {
-			final String attributeid = keys[i], key0 = attributesidkey.concat(attributeid);
-			attributes.put(attributeid, readAttributes(sb, sc, key0.concat("\0")));
-			if(attributeid.equals(DEFAULT)) {
-				priorities.put((byte)0, DEFAULT);
-				continue;
-			}
+			final String groupid = keys[i], key0 = groupskey.concat(groupid);
+			attributes.put(groupid, readAttributes(sb, sc, key0.concat("\0attributes\0")));
 			byte priority = sc.getByteOrDefault(key0, (byte)0x01);
 			byte j = 0;
 			while(priorities.containsKey(priority) && --j != 0) {
 				++priority;
 			}
-			priorities.put(priority, attributeid);
+			priorities.put(priority, groupid);
 		}
 		i = ids.length;
 		byte j = -1;
-		while(i > -1 && --j != -1) {
+		while(i > -1 && ++j != -1) {
 			String attributeid = priorities.get(j);
 			if(attributeid == null) {
 				continue;

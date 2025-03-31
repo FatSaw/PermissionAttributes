@@ -11,7 +11,7 @@ import org.bukkit.scheduler.BukkitScheduler;
 
 public final class PermissionAttributes extends JavaPlugin {
 	
-	protected final static String PERMISSION_PREFIX = "pa.", DEFAULT = "default";
+	protected final static String PERMISSION_PREFIX = "pa.", DEFAULT = new String();
 	protected final static int PERMISSION_PREFIX_SIZE = PERMISSION_PREFIX.length();
 	
 	private final Logger logger;
